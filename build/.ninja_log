@@ -1,0 +1,5 @@
+# ninja log v6
+8	364	7492485427007220	CMakeFiles/app.dir/src/main.cpp.obj	fa18824897b4d41
+13	396	7492485427052877	CMakeFiles/app.dir/src/threadpool.cpp.obj	fd6324bf402ddf8e
+428	736	7492484082402772	D:/workspace/threadpool/bin/app.exe	5d749de64d4ee8bf
+14	313	7492485543568804	D:/workspace/threadpool/bin/app.exe	5d749de64d4ee8bf
