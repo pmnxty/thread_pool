@@ -1,0 +1,4 @@
+# ninja log v5
+0	365	1728038901032538580	CMakeFiles/app.dir/src/main.cpp.o	58b913c17cf847c7
+1	409	1728038901082538590	CMakeFiles/app.dir/src/threadpool.cpp.o	ab5746466aab9256
+409	611	1728038901282538624	../bin/app	da6116ea16332bc5

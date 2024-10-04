@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/root/workspace/threadpool/build",
+  "command": "/usr/bin/g++ -I/root/workspace/threadpool/include  -std=c++20 -g -o CMakeFiles/app.dir/src/main.cpp.o -c /root/workspace/threadpool/src/main.cpp",
+  "file": "/root/workspace/threadpool/src/main.cpp"
+},
+{
+  "directory": "/root/workspace/threadpool/build",
+  "command": "/usr/bin/g++ -I/root/workspace/threadpool/include  -std=c++20 -g -o CMakeFiles/app.dir/src/threadpool.cpp.o -c /root/workspace/threadpool/src/threadpool.cpp",
+  "file": "/root/workspace/threadpool/src/threadpool.cpp"
+}
+]
