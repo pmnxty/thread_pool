@@ -1,41 +1,59 @@
-#include <pthread.h>
+#pragma once
+#ifndef THREAD_POOL_H
+#define THREAD_POOL_H
+
+#include <atomic>
+#include <condition_variable>
+#include <functional>
+#include <future>
+#include <map>
+#include <mutex>
 #include <queue>
-using callback = void (*)(void*);
-using long_int = long unsigned int;
-
-typedef struct Task {
-    Task();
-    Task(callback func, void* a);
-
-    callback function;
-    void* arg;
-} Task;
+#include <thread>
+#include <vector>
 
 class ThreadPool {
+#define PER_CHANGE_NUM 2
+    using thread_id = decltype(std::this_thread::get_id());
+
    public:
-    ThreadPool(int min, int max);
+    ThreadPool(int min, int max = std::thread::hardware_concurrency());
     ~ThreadPool();
-    void add_task(Task task);
-    long_int get_busy();
-    long_int get_live();
+    template <typename Func, typename... Args>
+    auto commit(Func&& func,
+                Args&&... args) -> std::future<decltype(func(args...))> {
+        using res_type = decltype(func(args...));
+
+        auto task = std::make_shared<std::packaged_task<res_type()>>(
+            std::bind(std::forward<Func>(func), std::forward<Args>(args)...));
+        {
+            std::lock_guard<std::mutex> lck(mutex_t);
+            task_q.emplace([task] { (*task)(); });
+        }
+        not_empty.notify_one();
+        return task->get_future();
+    }
 
    private:
-    static void* manager_(void*);
-    static void* worker_(void*);
-    void thread_exit_();
+    void worker();
+    void manager();
 
    private:
-    std::queue<Task> task_q;
-    pthread_t manager_id;
-    pthread_t* worker_ids;
-    pthread_mutex_t mutex;
-    pthread_mutex_t busy_mutex;
-    pthread_cond_t cant_empty;
-    long_int max_thread;
-    long_int min_thread;
-    long_int busy_thread;
-    long_int live_thread;
-    long_int exit_thread;
-    bool shutdown;
-    const int per_changer_num_ = 2;
+    std::queue<std::function<void()>> task_q;
+
+    std::thread manager_id;
+    std::map<thread_id, std::thread> work_ids;
+    std::vector<thread_id> exit_works;
+    std::mutex mutex_exit;
+    std::mutex mutex_t;
+    std::condition_variable not_empty;
+
+    size_t max_thread;
+    size_t min_thread;
+    std::atomic<size_t> cur_thread;
+    std::atomic<size_t> free_thread;
+    std::atomic<size_t> exit_thread;
+    std::atomic<bool> shutdown;
 };
+
+#endif  // THREAD_POOL_H

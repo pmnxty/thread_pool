@@ -1,31 +1,29 @@
-
-#include <iostream>
-#include <string>
-#include <unistd.h>
 #include "threadpool.h"
+#include <iostream>
+#include <chrono>
+#include <vector>
 
-void function(void* arg){
-    int num = *(int*) arg;
-    printf("thread %ld output data %d...\n", pthread_self(), num);
-    sleep(1);
+int func(int val){
+    printf("thread %lld output a value %d\n", std::this_thread::get_id(), val);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    return val * 10;
 }
 
 int main(){
     {
         ThreadPool pool(3, 10);
+        std::vector<decltype(pool.commit(func, 10000))> vec;
         for(int i = 0; i < 100; i++){
-            Task task;
-            int* num = new int;
-            *num = i;
-            task.arg = num;
-            task.function = function;
-            pool.add_task(task);
+            vec.emplace_back(pool.commit(func, i));
         }
 
-        sleep(15);
-    }
+        for(auto it = vec.begin(); it != vec.end(); it++){
+            int tmp = (*it).get();
+            std::cout << tmp << std::endl;
+        }
 
-    system("pause");
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+    }
 
     return 0;
 }
